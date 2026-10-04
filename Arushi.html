@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>A Letter For You</title>
+  
+  <!-- Aesthetic Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Alex+Brush&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <style>
+    :root {
+      --bg-cream: #FAF7F2;
+      --paper-bg: #FFFFFF;
+      --paper-border: #E8E2D8;
+      --text-dark: #2F342B;
+      --text-muted: #6C7265;
+      --sage-primary: #5E7153;
+      --sage-dark: #46553D;
+      --sage-soft: #EEF2EB;
+      --rose-accent: #8E4A49;
+      --rose-soft: #F9EDED;
+      --font-body: 'Cormorant Garamond', serif;
+      --font-title: 'Alex Brush', cursive;
+      --font-sans: 'Montserrat', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-cream);
+      background-image: 
+        radial-gradient(circle at 10% 15%, rgba(94, 113, 83, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 90% 85%, rgba(142, 74, 73, 0.07) 0%, transparent 50%);
+      color: var(--text-dark);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: clamp(20px, 4vw, 50px) 16px;
+      line-height: 1.8;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Ambient Floating Petals */
+    .petals-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .petal {
+      position: absolute;
+      background: radial-gradient(circle, rgba(142, 74, 73, 0.25) 0%, rgba(94, 113, 83, 0.12) 100%);
+      border-radius: 120% 0 120% 0;
+      opacity: 0.6;
+      animation: floatPetal 14s infinite linear;
+    }
+
+    @keyframes floatPetal {
+      0% { transform: translateY(-10vh) translateX(0) rotate(0deg); opacity: 0; }
+      10% { opacity: 0.7; }
+      90% { opacity: 0.5; }
+      100% { transform: translateY(105vh) translateX(120px) rotate(360deg); opacity: 0; }
+    }
+
+    .container {
+      width: 100%;
+      max-width: 660px;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* Stationery Card Styles */
+    .stationery-card {
+      background: var(--paper-bg);
+      border: 1px solid var(--paper-border);
+      border-radius: 18px;
+      padding: clamp(32px, 6vw, 54px) clamp(20px, 5vw, 42px);
+      box-shadow: 0 14px 40px rgba(50, 56, 45, 0.05), 0 2px 10px rgba(0, 0, 0, 0.02);
+      position: relative;
+      animation: pageIn 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes pageIn {
+      from { opacity: 0; transform: translateY(16px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* Top Corner Sticker on Letter */
+    .card-top-sticker {
+      position: absolute;
+      top: -30px;
+      right: 14px;
+      width: clamp(65px, 15vw, 85px);
+      height: auto;
+      transform: rotate(5deg);
+      filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.1));
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .quirky-eyebrow {
+      font-family: var(--font-sans);
+      font-size: 0.75rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--rose-accent);
+      margin-bottom: 8px;
+      display: inline-block;
+      font-weight: 600;
+      background: var(--rose-soft);
+      padding: 4px 12px;
+      border-radius: 20px;
+    }
+
+    .front-subheading {
+      font-size: clamp(1.1rem, 3.5vw, 1.25rem);
+      font-style: italic;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    .floral-divider {
+      text-align: center;
+      margin: 0 0 18px 0;
+      color: var(--sage-primary);
+      opacity: 0.8;
+    }
+
+    .floral-divider svg {
+      width: 32px;
+      height: 32px;
+    }
+
+    /* Music Player Snippet Bar */
+    .audio-player-card {
+      margin: 10px 0 20px 0;
+      background: var(--bg-cream);
+      border: 1px solid var(--paper-border);
+      border-radius: 30px;
+      padding: 8px 18px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .audio-player-card:hover {
+      background: var(--sage-soft);
+      border-color: var(--sage-primary);
+    }
+
+    .audio-btn-icon {
+      width: 28px;
+      height: 28px;
+      background: var(--sage-primary);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+    }
+
+    .audio-label {
+      font-family: var(--font-sans);
+      font-size: 0.82rem;
+      letter-spacing: 0.05em;
+      color: var(--text-dark);
+      font-weight: 500;
+    }
+
+    /* Front Page Interactive Envelope */
+    .envelope-box {
+      background: var(--sage-soft);
+      border: 2px dashed #C8D6C3;
+      border-radius: 16px;
+      padding: 42px 20px;
+      margin: 18px 0 10px 0;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .envelope-box:hover, .envelope-box:active {
+      background: #E4ECE0;
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px rgba(94, 113, 83, 0.15);
+    }
+
+    .wax-seal {
+      width: 60px;
+      height: 60px;
+      background: var(--rose-accent);
+      color: #FFFFFF;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      box-shadow: 0 4px 12px rgba(142, 74, 73, 0.35);
+      border: 2px solid #AA5E5D;
+      transition: transform 0.3s ease;
+    }
+
+    .envelope-box:hover .wax-seal {
+      transform: scale(1.1) rotate(6deg);
+    }
+
+    .envelope-prompt {
+      font-family: var(--font-sans);
+      font-size: 0.88rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 500;
+      color: var(--sage-dark);
+    }
+
+    .envelope-hint {
+      font-size: 0.95rem;
+      font-style: italic;
+      color: var(--text-muted);
+    }
+
+    /* Letter Typography with No Mid-Word Splits */
+    .letter-header {
+      font-family: var(--font-title);
+      font-size: clamp(2.6rem, 8vw, 3.4rem);
+      color: var(--rose-accent);
+      text-align: left;
+      margin-bottom: 18px;
+      font-weight: normal;
+      line-height: 1.1;
+    }
+
+    .letter-body {
+      font-size: clamp(1.12rem, 3.5vw, 1.25rem);
+      color: var(--text-dark);
+      letter-spacing: 0.015em;
+      text-align: left;
+      word-break: keep-all;
+      overflow-wrap: break-word;
+      hyphens: none;
+      -webkit-hyphens: none;
+      text-wrap: pretty;
+    }
+
+    .letter-body p {
+      margin-bottom: 18px;
+      text-align: left;
+      word-break: keep-all;
+      overflow-wrap: break-word;
+      hyphens: none;
+      -webkit-hyphens: none;
+    }
+
+    .letter-signature {
+      margin-top: 28px;
+      font-style: italic;
+      color: var(--text-dark);
+      font-size: clamp(1.2rem, 4vw, 1.35rem);
+    }
+
+    /* Buttons & Nav */
+    .nav-section {
+      margin-top: 36px;
+      padding-top: 24px;
+      border-top: 1px solid var(--paper-border);
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    button {
+      font-family: var(--font-sans);
+      font-size: 0.88rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 13px 30px;
+      min-height: 48px;
+      border-radius: 30px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      outline: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-weight: 500;
+    }
+
+    button:active {
+      transform: scale(0.96);
+    }
+
+    .btn-next, .btn-yes {
+      background-color: var(--sage-primary);
+      border: 1px solid var(--sage-primary);
+      color: #FFFFFF;
+      box-shadow: 0 4px 14px rgba(94, 113, 83, 0.2);
+    }
+
+    .btn-next:hover, .btn-yes:hover {
+      background-color: var(--sage-dark);
+      border-color: var(--sage-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(94, 113, 83, 0.3);
+    }
+
+    .btn-no {
+      background-color: transparent;
+      border: 1px solid var(--paper-border);
+      color: var(--text-muted);
+    }
+
+    .btn-no:hover {
+      background-color: var(--rose-soft);
+      border-color: var(--rose-accent);
+      color: var(--rose-accent);
+    }
+
+    /* Question & Status Views */
+    .centered-screen {
+      text-align: center;
+      padding: clamp(24px, 5vw, 40px) 10px;
+    }
+
+    .question-title {
+      font-family: var(--font-body);
+      font-size: clamp(1.6rem, 5vw, 2.1rem);
+      font-weight: 500;
+      font-style: italic;
+      color: var(--sage-dark);
+      margin-bottom: 28px;
+      line-height: 1.4;
+    }
+
+    .btn-group {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .btn-group button {
+      min-width: 130px;
+    }
+
+    .state-sticker {
+      width: clamp(100px, 28vw, 130px);
+      height: auto;
+      margin: 0 auto 20px auto;
+      display: block;
+      filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.08));
+    }
+
+    .state-title {
+      font-family: var(--font-title);
+      font-size: clamp(2.8rem, 8vw, 3.6rem);
+      margin-bottom: 16px;
+      line-height: 1.2;
+    }
+
+    .state-title.accepted {
+      color: var(--sage-dark);
+    }
+
+    .state-title.friendship {
+      color: var(--rose-accent);
+    }
+
+    .state-body {
+      font-size: clamp(1.15rem, 3.8vw, 1.35rem);
+      color: var(--text-dark);
+      max-width: 480px;
+      margin: 0 auto;
+      line-height: 1.8;
+      font-style: italic;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* Tap Ripple */
+    .tap-heart {
+      position: fixed;
+      pointer-events: none;
+      font-size: 20px;
+      color: var(--rose-accent);
+      opacity: 0.85;
+      animation: flyFade 1s forwards ease-out;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+    }
+
+    @keyframes flyFade {
+      0% { transform: translate(-50%, -50%) scale(0.6); opacity: 0.9; }
+      100% { transform: translate(-50%, -120%) scale(1.4); opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background Petals -->
+  <div class="petals-container" id="petals"></div>
+
+  <!-- Song Snippet Audio Element (Add your audio file here) -->
+  <audio id="snippetAudio" preload="auto" src="snippet.mp3"></audio>
+
+  <div class="container">
+
+    <!-- PAGE 0: FRONT COVER -->
+    <div class="stationery-card" id="page-front">
+      <div style="text-align: center;">
+        <h1 class="letter-header" style="text-align: center; margin-top: 4px;">Hello, Chaos.</h1>
+        <p class="front-subheading">
+          Handle with care: fragile ego and an anxious overthinker inside.
+        </p>
+
+        <!-- Tap to play song snippet -->
+        <div class="audio-player-card" onclick="toggleSongSnippet()">
+          <div class="audio-btn-icon" id="audioIcon">▶</div>
+          <span class="audio-label" id="audioText">Play Song Snippet ♫</span>
+        </div>
+      </div>
+
+      <!-- Wax Sealed Envelope Trigger to Open Letter -->
+      <div class="envelope-box" onclick="openLetterPage()">
+        <div class="wax-seal">💌</div>
+        <div class="envelope-prompt">Click to break seal & open letter</div>
+        <div class="envelope-hint">(Written with 100% honesty & mild panic)</div>
+      </div>
+    </div>
+
+    <!-- PAGE 1: THE LETTER -->
+    <div class="stationery-card hidden" id="page-letter">
+      <!-- Daisy Hello Kitty Top Sticker -->
+      <img src="download (5).png" alt="Decorative sticker" class="card-top-sticker"[cite: 3]>
+
+      <!-- Botanical Divider -->
+      <div class="floral-divider">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2a9 9 0 0 1 9 9c0 4.97-4.03 9-9 9a9 9 0 0 1-9-9c0-4.97 4.03-9 9-9z"/>
+          <path d="M12 7v10"/>
+          <path d="M8 12c1.5-2 4-2 4-2s2.5 0 4 2"/>
+        </svg>
+      </div>
+
+      <div style="margin-bottom: 12px;">
+        <span class="quirky-eyebrow">Subject: Debates I Will Probably Keep Losing</span>
+      </div>
+
+      <h1 class="letter-header">Miss Arushi,</h1>
+      
+      <div class="letter-body">
+        <p>
+          We haven’t known each other for more than a month. And honestly speaking, it’s been long enough since I properly saw you that I’ve almost forgotten what you look like. Most of what I know about you is pieced together from random facts and glimpses of your personality. But the parts I do know? I genuinely like them. And I’d love nothing more than to discover the rest.
+        </p>
+        <p>
+          I know you carry fierce ambitions, and on paper, our paths don’t neatly align. We aren’t the textbook definition of compatible—you have NEET, and I have placements and internships to chase. I know I’m probably far from your ideal type. You bring chaos to my calm. You lean avoidant, and I tend to be anxious, an impossible combination.
+        </p>
+        <p>
+          Yet despite all of that, I find myself drawn to you. I love our debates, even though nine times out of ten I end up losing them. I like the moments when we talk about the deep, vulnerable things. Half the time, the only reason I open Instagram is just to see if you texted. And if you asked me what I like most about you, it’s the person you bring out in me when your chaos meets my world. I admire your intelligence, the way you always have something witty to say, your godly taste in music, and even how particular you are about the things you love. I’m still learning your likes and pet peeves and still figuring out how to actually make things right whenever I mess up.
+        <p>
+          I won’t pretend I have it all together. I am definitely not like the girl you like from Ladakh, nor like anyone else you cross paths with online. I can get protective, jealous, and unsure. I catch feelings quickly, but I hold onto them wholeheartedly as long as the other person values and reciprocates them. I am still a work in progress, learning and unlearning, trying to become the best version of myself.
+        </p>
+        <p>
+          I know how sacred your dreams are to you, and I never want to be someone who stands in the way of what you want to achieve. Instead, I want to be right there on the sidelines,quietly cheering you on and having your back while you work on your goals and I build my own future.
+        </p>
+        <p>
+          I know you don't really believe in long-distance, but perhaps for now, distance is just a quiet space for us to build something real until we can finally stand face-to-face. I’m not asking for all your hours or impossible promises. I just want one small, sincere commitment to try. Whether this works or not, one thing is certain: I will always respect you, your space, and your boundaries.
+        </p>
+        
+        <div class="letter-signature">
+          — Vivian
+        </div>
+      </div>
+
+      <!-- Next Button to Question -->
+      <div class="nav-section">
+        <button class="btn-next" onclick="goToQuestionPage()">
+          Next <span>&rarr;</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- PAGE 2: THE QUESTION -->
+    <div class="stationery-card hidden" id="page-question">
+      <div class="floral-divider">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2a9 9 0 0 1 9 9c0 4.97-4.03 9-9 9a9 9 0 0 1-9-9c0-4.97 4.03-9 9-9z"/>
+          <path d="M12 7v10"/>
+          <path d="M8 12c1.5-2 4-2 4-2s2.5 0 4 2"/>
+        </svg>
+      </div>
+
+      <div class="centered-screen">
+        <span class="quirky-eyebrow">The Moment of Truth</span>
+        <div class="question-title" style="margin-top: 14px;">So, should we give it a try?</div>
+        <div class="btn-group">
+          <button class="btn-yes" id="yesBtn" onclick="onYesClicked()">Yes</button>
+          <button class="btn-no" id="noBtn" onclick="onNoClicked()">No</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGE 3A: CELEBRATION VIEW (Yes clicked) -->
+    <div class="stationery-card hidden" id="page-celebration">
+      <div class="centered-screen">
+        <!-- Winking Hello Kitty in Green Overalls -->
+        <img src="הלו קיטי.png" alt="Celebration sticker" class="state-sticker"[cite: 4]>
+        <h2 class="state-title accepted"> Ahhhhhhhhhhhhhhhh</h2>
+        <p class="state-body">
+         "You actually gave it a chance? Like, fr? I can’t believe it. Damn, all the palpitations and nervousness were totally worth it."
+        </p>
+      </div>
+    </div>
+
+    <!-- PAGE 3B: FRIENDSHIP VIEW (No clicked) -->
+    <div class="stationery-card hidden" id="page-friendship">
+      <div class="centered-screen">
+        <!-- Frog Hat Kitty -->
+        <img src="download (6).png" alt="Friendship sticker" class="state-sticker"[cite: 2]>
+        <h2 class="state-title friendship">Friendship</h2>
+        <p class="state-body">
+          "It's ok let's stay friends. You are too precious to lose."
+        </p>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // Audio Player Configuration for Song Snippet
+    const audio = document.getElementById('snippetAudio');
+    const audioIcon = document.getElementById('audioIcon');
+    const audioText = document.getElementById('audioText');
+
+    // OPTIONAL: set snippet start & end time in seconds (e.g. from 45s to 75s)
+    const SNIPPET_START = 0;   // Change this to snippet start second
+    const SNIPPET_END = 0;     // Set to e.g. 35 to stop after 35s (0 = full file)
+
+    function toggleSongSnippet() {
+      if (audio.paused) {
+        if (SNIPPET_START > 0 && audio.currentTime < SNIPPET_START) {
+          audio.currentTime = SNIPPET_START;
+        }
+        audio.play().then(() => {
+          audioIcon.innerText = '❚❚';
+          audioText.innerText = 'Playing snippet ♫';
+        }).catch(err => {
+          console.log("Audio play error:", err);
+          alert("Audio file not found! Place your song file named 'snippet.mp3' in the same folder.");
+        });
+      } else {
+        audio.pause();
+        audioIcon.innerText = '▶';
+        audioText.innerText = 'Resume Snippet ♫';
+      }
+    }
+
+    if (SNIPPET_END > 0) {
+      audio.ontimeupdate = () => {
+        if (audio.currentTime >= SNIPPET_END) {
+          audio.pause();
+          audio.currentTime = SNIPPET_START;
+          audioIcon.innerText = '▶';
+          audioText.innerText = 'Replay Snippet ♫';
+        }
+      };
+    }
+
+    audio.onended = () => {
+      audioIcon.innerText = '▶';
+      audioText.innerText = 'Replay Snippet ♫';
+    };
+
+    // Falling Ambient Petals
+    const petalsContainer = document.getElementById('petals');
+    const petalColors = [
+      'radial-gradient(circle, rgba(142, 74, 73, 0.22) 0%, rgba(94, 113, 83, 0.1) 100%)',
+      'radial-gradient(circle, rgba(94, 113, 83, 0.25) 0%, rgba(244, 239, 230, 0.1) 100%)'
+    ];
+
+    for (let i = 0; i < 15; i++) {
+      const petal = document.createElement('div');
+      petal.className = 'petal';
+      const size = Math.random() * 14 + 10;
+      petal.style.width = size + 'px';
+      petal.style.height = (size * 1.4) + 'px';
+      petal.style.left = Math.random() * 100 + 'vw';
+      petal.style.animationDelay = (Math.random() * 10) + 's';
+      petal.style.animationDuration = (Math.random() * 7 + 10) + 's';
+      petal.style.background = petalColors[Math.floor(Math.random() * petalColors.length)];
+      petalsContainer.appendChild(petal);
+    }
+
+    // Touch Heart Sparks
+    document.addEventListener('pointerdown', (e) => {
+      if (e.target.closest('button') || e.target.closest('.envelope-box') || e.target.closest('.audio-player-card')) return;
+      const heart = document.createElement('div');
+      heart.className = 'tap-heart';
+      heart.innerHTML = '✦';
+      heart.style.left = e.clientX + 'px';
+      heart.style.top = e.clientY + 'px';
+      document.body.appendChild(heart);
+      setTimeout(() => heart.remove(), 1000);
+    });
+
+    // Unseal & Open Letter
+    function openLetterPage() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      document.getElementById('page-front').classList.add('hidden');
+      document.getElementById('page-letter').classList.remove('hidden');
+    }
+
+    // Go to the Question
+    function goToQuestionPage() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      document.getElementById('page-letter').classList.add('hidden');
+      document.getElementById('page-question').classList.remove('hidden');
+    }
+
+    // Yes Outcome
+    function onYesClicked() {
+      confetti({
+        particleCount: 90,
+        spread: 80,
+        origin: { y: 0.65 },
+        colors: ['#5E7153', '#8E4A49', '#D9C8B4', '#FAF7F2', '#A3B19B']
+      });
+
+      document.getElementById('page-question').classList.add('hidden');
+      document.getElementById('page-celebration').classList.remove('hidden');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // No Outcome
+    function onNoClicked() {
+      document.getElementById('page-question').classList.add('hidden');
+      document.getElementById('page-friendship').classList.remove('hidden');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  </script>
+</body>
+</html>
